@@ -4,7 +4,7 @@ A collection of utility nodes for Qwen-based image editing in ComfyUI.
 
 ## Node
 
-![Example](https://github.com/https://github.com/lrzjason/Comfyui-QwenEditUtils/blob/master/example.png)
+![Example](https://github.com/lrzjason/Comfyui-QwenEditUtils/blob/master/example.png)
 
 ### TextEncodeQwenImageEdit 小志Jason(xiaozhijason)
 
