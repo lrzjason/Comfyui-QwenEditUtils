@@ -1,14 +1,14 @@
 [project]
-name = "condition-utils"
+name = "qweneditutils"
 description = ""
 version = "1.0.0"
 license = {file = "LICENSE"}
 
 [project.urls]
-Repository = "https://github.com/lrzjason/Comfyui-Condition-Utils"
+Repository = "https://github.com/lrzjason/Comfyui-QwenEditUtils"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
 PublisherId = "lrzjason"
-DisplayName = "Comfyui-Condition-Utils"
+DisplayName = "Comfyui-QwenEditUtils"
 Icon = ""
