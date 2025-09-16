@@ -6,6 +6,11 @@ A collection of utility nodes for Qwen-based image editing in ComfyUI.
 
 ![Example](https://raw.githubusercontent.com/lrzjason/Comfyui-QwenEditUtils/refs/heads/master/example.png)
 
+Online workflow:
+QwenEdit Consistance Edit workflow v2.0
+
+https://www.runninghub.ai/post/1965033238311915522/?inviteCode=rh-v1279
+
 ### TextEncodeQwenImageEdit 小志Jason(xiaozhijason)
 
 This node provides text encoding functionality with reference image support for Qwen-based image editing workflows. It allows you to encode prompts while incorporating reference images for more controlled image generation.
