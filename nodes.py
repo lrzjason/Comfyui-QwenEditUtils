@@ -182,7 +182,7 @@ class TextEncodeQwenImageEditAdvanced_lrzjason:
         }
 
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "IMAGE", "LATENT", )
-    RETURN_NAMES = ("conditioning", "conditioning_without_image", "cropped_image", "latent")
+    RETURN_NAMES = ("conditioning", "cond_without_image", "cropped_image", "latent")
     FUNCTION = "encode"
 
     CATEGORY = "advanced/conditioning"
