@@ -154,11 +154,73 @@ class TextEncodeQwenImageEdit_lrzjason:
         return (conditioning, image, {"samples": ref_latent})
 
 
+class TextEncodeQwenImageEditAdvanced_lrzjason:
+    @classmethod
+    def INPUT_TYPES(s):
+        resolution_choices = [
+            2048, 1536, 1328, 1024, 768, 512
+        ]
+        return {
+            "required": 
+            {
+                "clip": ("CLIP", ),
+                "prompt": ("STRING", {"multiline": True, "dynamicPrompts": True}),
+            },
+            "optional": 
+            {
+                "vae": ("VAE", ),
+                "image": ("IMAGE", ),
+                "enable_resize": ("BOOLEAN", {"default": True}),
+                "resolution": (resolution_choices, {
+                    "default": 1024,
+                }),
+                "resize_method": (["cv2", "pil"], {
+                    "default": "cv2",
+                }),
+                "return_cond_without_image": ("BOOLEAN", {"default": True}),
+            }
+        }
+
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "IMAGE", "LATENT", )
+    RETURN_NAMES = ("conditioning", "conditioning_without_image", "cropped_image", "latent")
+    FUNCTION = "encode"
+
+    CATEGORY = "advanced/conditioning"
+
+    def encode(self, clip, prompt, vae=None, image=None, enable_resize=True, resolution=1024, resize_method="cv2", return_cond_without_image=True):
+        ref_latent = None
+        images = []
+        
+        if image is not None:
+            # Process image if needed
+            if enable_resize:
+                # More efficient processing
+                samples = image.squeeze(0).numpy()  # Convert to HWC format
+                cropped_image = crop_image(samples, resolution, resize_method)
+                image = torch.from_numpy(cropped_image).unsqueeze(0)  # Convert back to BCHW format
+                
+            images = [image]
+            if vae is not None:
+                ref_latent = vae.encode(image)
+                
+        tokens = clip.tokenize(prompt, images=images)
+        conditioning = clip.encode_from_tokens_scheduled(tokens)
+        if ref_latent is not None:
+            conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latent]})
+            
+        if return_cond_without_image:
+            tokens_without_images = clip.tokenize(prompt)
+            conditioning_without_images = clip.encode_from_tokens_scheduled(tokens_without_images)
+            
+        return (conditioning, conditioning_without_images, image, {"samples": ref_latent})
+
 NODE_CLASS_MAPPINGS = {
     "TextEncodeQwenImageEdit_lrzjason": TextEncodeQwenImageEdit_lrzjason,
+    "TextEncodeQwenImageEditAdvanced_lrzjason": TextEncodeQwenImageEditAdvanced_lrzjason
 }
 
 # Display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
     "TextEncodeQwenImageEdit_lrzjason": "TextEncodeQwenImageEdit 小志Jason(xiaozhijason)",
+    "TextEncodeQwenImageEditAdvanced_lrzjason": "TextEncodeQwenImageEditAdvanced 小志Jason(xiaozhijason)",
 }
