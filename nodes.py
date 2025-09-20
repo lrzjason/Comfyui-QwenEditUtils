@@ -147,11 +147,11 @@ class TextEncodeQwenImageEdit_lrzjason:
                 ref_latent = vae.encode(image)
                 
         tokens = clip.tokenize(prompt, images=images)
-        conditioning_list = clip.encode_from_tokens_scheduled(tokens)
+        conditioning = clip.encode_from_tokens_scheduled(tokens)
         if ref_latent is not None:
-            conditioning_ref = node_helpers.conditioning_set_values(conditioning_ref, {"reference_latents": [ref_latent]})
+            conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latent]})
             
-        return (conditioning_ref, conditioning_list, image, {"samples": ref_latent})
+        return (conditioning, image, {"samples": ref_latent})
 
 
 NODE_CLASS_MAPPINGS = {
