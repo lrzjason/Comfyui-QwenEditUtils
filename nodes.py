@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import torch
 import cv2
+import copy
 def get_nearest_resolution(image, resolution=1024):
     height, width, _ = image.shape
     
@@ -145,12 +146,12 @@ class TextEncodeQwenImageEdit_lrzjason:
                 ref_latent = vae.encode(image)
                 
         tokens = clip.tokenize(prompt, images=images)
-        conditioning = clip.encode_from_tokens_scheduled(tokens)
-        conditioning_ref = conditioning
+        conditioning_list = clip.encode_from_tokens_scheduled(tokens)
+        conditioning_ref = copy.deepcopy(conditioning_list)
         if ref_latent is not None:
             conditioning_ref = node_helpers.conditioning_set_values(conditioning_ref, {"reference_latents": [ref_latent]})
             
-        return (conditioning_ref, conditioning, image, {"samples": ref_latent})
+        return (conditioning_ref, conditioning_list, image, {"samples": ref_latent})
 
 
 NODE_CLASS_MAPPINGS = {
