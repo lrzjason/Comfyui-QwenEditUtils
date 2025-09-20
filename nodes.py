@@ -122,7 +122,8 @@ class TextEncodeQwenImageEdit_lrzjason:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING", "IMAGE", "LATENT", )
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "IMAGE", "LATENT", )
+    RETURN_NAMES = ("cond_with_ref", "cond_without_ref","cropped_image", "latent")
     FUNCTION = "encode"
 
     CATEGORY = "advanced/conditioning"
@@ -145,10 +146,11 @@ class TextEncodeQwenImageEdit_lrzjason:
                 
         tokens = clip.tokenize(prompt, images=images)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
+        conditioning_ref = conditioning
         if ref_latent is not None:
-            conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latent]})
+            conditioning_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latent]})
             
-        return (conditioning, image, {"samples": ref_latent})
+        return (conditioning_ref, conditioning, image, {"samples": ref_latent})
 
 
 NODE_CLASS_MAPPINGS = {
