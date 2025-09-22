@@ -131,7 +131,7 @@ class TextEncodeQwenImageEdit_lrzjason:
 
     CATEGORY = "advanced/conditioning"
 
-    def encode(self, clip, prompt, vae=None, image=None, enable_resize=True, resolution=1024, resize_method="cv2", vl_encode_resize=True):
+    def encode(self, clip, prompt, vae=None, image=None, enable_resize=True, resolution=1024, resize_method="cv2", vl_encode_resize=False):
         ref_latent = None
         images = []
         vae_image = None
@@ -194,7 +194,7 @@ class TextEncodeQwenImageEditAdvanced_lrzjason:
 
     CATEGORY = "advanced/conditioning"
 
-    def encode(self, clip, prompt, vae=None, image=None, enable_resize=True, resolution=1024, resize_method="cv2", return_cond_without_image=True, vl_encode_resize=True):
+    def encode(self, clip, prompt, vae=None, image=None, enable_resize=True, resolution=1024, resize_method="cv2", return_cond_without_image=True, vl_encode_resize=False):
         ref_latent = None
         images = []
         vae_image = None
