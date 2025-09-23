@@ -2,6 +2,13 @@
 
 A collection of utility nodes for Qwen-based image editing in ComfyUI.
 
+## Example
+
+<p align="center">
+  <img src="example.png" alt="Example Workflow" width="45%" />
+  <img src="result.png" alt="Result Image" width="45%" />
+</p>
+
 ## Node
 
 ### TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)
