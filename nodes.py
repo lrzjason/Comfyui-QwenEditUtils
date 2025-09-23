@@ -31,7 +31,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                 "enable_vl_resize": ("BOOLEAN", {"default": True}),
                 "upscale_method": (s.upscale_methods,),
                 "crop": (s.crop_methods,),
-                "llama_template": ("STRING", {"multiline": True, "default": "<|im_start|>system\nDescribe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"}),
+                "instruction": ("STRING", {"multiline": True, "default": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."}),
                 
             }
         }
@@ -47,14 +47,19 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                enable_resize=True, enable_vl_resize=True, 
                upscale_method="bicubic",
                crop="center",
-               llama_template=""
+               instruction=""
                ):
         ref_latents = []
         images = [image1, image2, image3, image4, image5]
         images_vl = []
         vae_images = []
-        if llama_template == "":
-            llama_template = "<|im_start|>system\nDescribe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
+        template_prefix = "<|im_start|>system\n"
+        template_suffix = "<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
+        if instruction == "":
+            instruction_content = "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+        else:
+            instruction_content = instruction
+        llama_template = template_prefix + instruction_content + template_suffix
         image_prompt = ""
 
         for i, image in enumerate(images):
