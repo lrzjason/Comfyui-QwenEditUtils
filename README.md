@@ -78,31 +78,6 @@ This node provides text encoding functionality with reference image support for 
 - Enhanced documentation to accurately reflect node inputs and outputs
 - Fixed latent output handling to properly return first reference image latent
 
-### v1.0.4
-- Fixed critical bug with undefined `image_prompt` variable
-- Fixed error when no reference images are provided
-- Improved node stability and error handling
-- Updated node implementation to support up to 5 reference images
-- Added support for custom Llama templates
-- Improved image processing and resizing logic
-- Enhanced VL encoding with better image description capabilities
-
-### v1.0.3
-- Fixed critical bug with undefined `image_prompt` variable
-- Fixed error when no reference images are provided
-- Improved node stability and error handling
-- Updated node implementation to support up to 5 reference images
-- Added support for custom Llama templates
-- Improved image processing and resizing logic
-- Enhanced VL encoding with better image description capabilities
-
-### v1.0.2
-- Updated node implementation to support up to 5 reference images
-- Added support for custom Llama templates
-- Improved image processing and resizing logic
-- Enhanced VL encoding with better image description capabilities
-- Fixed issues with latent encoding for multiple images
-
 ### v1.0.1
 - Initial release with basic text encoding and single image reference support
 
