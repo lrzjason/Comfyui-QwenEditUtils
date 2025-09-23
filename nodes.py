@@ -67,6 +67,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                     width = round(samples.shape[3] * scale_by / 8.0) * 8
                     height = round(samples.shape[2] * scale_by / 8.0) * 8
                     s = comfy.utils.common_upscale(samples, width, height, "area", "disabled")
+                    image = s.movedim(1, -1)
                     ref_latents.append(vae.encode(image[:, :, :, :3]))
                     vae_images.append(image)
                 image_prompt += "Picture {}: <|vision_start|><|image_pad|><|vision_end|>".format(i + 1)
@@ -76,7 +77,11 @@ class TextEncodeQwenImageEditPlus_lrzjason:
         if len(ref_latents) > 0:
             conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
         # Return latent of first image if available, otherwise return empty latent
-        latent_out = {"samples": ref_latents[0]} if len(ref_latents) > 0 else {"samples": torch.zeros(1, 4, 128, 128)}
+        samples = ref_latents[0]
+        # print(vae_images.shape)
+        vae_images = torch.cat(vae_images, dim=0)
+        # print(vae_images.shape)
+        latent_out = {"samples": samples} if len(ref_latents) > 0 else {"samples": torch.zeros(1, 4, 128, 128)}
         
         return (conditioning, vae_images, latent_out)
 
