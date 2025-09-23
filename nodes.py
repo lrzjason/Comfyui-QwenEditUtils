@@ -43,6 +43,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
         vae_images = []
         ref_latents = []
         vae_image = None
+        image_prompt = ""
         if llama_template is None or llama_template.strip() == "":
             llama_template = "<|im_start|>system\nDescribe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
         
@@ -76,10 +77,13 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                 
         tokens = clip.tokenize(image_prompt + prompt, images=images_vl, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
-        if ref_latents is not None:
+        if ref_latents is not None and len(ref_latents) > 0:
             conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latents]})
             
-        return (conditioning, vae_images, {"samples": ref_latents[0]})
+        # Return latent of first image if available, otherwise return empty latent
+        latent_out = {"samples": ref_latents[0]} if len(ref_latents) > 0 else {"samples": torch.zeros(1, 4, 128, 128)}
+        
+        return (conditioning, vae_images, latent_out)
 
 NODE_CLASS_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason
