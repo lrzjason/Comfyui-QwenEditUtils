@@ -31,8 +31,8 @@ class TextEncodeQwenImageEditPlus_lrzjason:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING", "IMAGE", "LATENT", )
-    RETURN_NAMES = ("conditioning", "cropped_image", "latent")
+    RETURN_TYPES = ("CONDITIONING", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "LATENT", )
+    RETURN_NAMES = ("conditioning", "image1", "image2", "image3", "image4", "image5", "latent")
     FUNCTION = "encode"
 
     CATEGORY = "advanced/conditioning"
@@ -79,11 +79,13 @@ class TextEncodeQwenImageEditPlus_lrzjason:
         # Return latent of first image if available, otherwise return empty latent
         samples = ref_latents[0]
         # print(vae_images.shape)
-        vae_images = torch.cat(vae_images, dim=0)
+        # vae_images = torch.cat(vae_images, dim=0)
         # print(vae_images.shape)
         latent_out = {"samples": samples} if len(ref_latents) > 0 else {"samples": torch.zeros(1, 4, 128, 128)}
-        
-        return (conditioning, vae_images, latent_out)
+        if len(vae_images) < 5:
+            vae_images.extend([None] * (5 - len(vae_images)))
+        o_image1, o_image2, o_image3, o_image4, o_image5 = vae_images
+        return (conditioning, o_image1, o_image2, o_image3, o_image4, o_image5, latent_out)
 
 NODE_CLASS_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason
