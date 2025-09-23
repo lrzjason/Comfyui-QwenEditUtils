@@ -9,6 +9,8 @@ import copy
 
 
 class TextEncodeQwenImageEditPlus_lrzjason:
+    upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "bislerp"]
+    crop_methods = ["disabled", "center"]
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -27,7 +29,10 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                 "image5": ("IMAGE", ),
                 "enable_resize": ("BOOLEAN", {"default": True}),
                 "enable_vl_resize": ("BOOLEAN", {"default": True}),
+                "upscale_method": (s.upscale_methods,),
+                "crop": (s.crop_methods,),
                 "llama_template": ("STRING", {"multiline": True, "default": "<|im_start|>system\nDescribe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"}),
+                
             }
         }
 
@@ -37,7 +42,13 @@ class TextEncodeQwenImageEditPlus_lrzjason:
 
     CATEGORY = "advanced/conditioning"
 
-    def encode(self, clip, prompt, vae=None, image1=None, image2=None, image3=None, image4=None, image5=None, enable_resize=True, enable_vl_resize=True, llama_template=""):
+    def encode(self, clip, prompt, vae=None, 
+               image1=None, image2=None, image3=None, image4=None, image5=None, 
+               enable_resize=True, enable_vl_resize=True, 
+               upscale_method="bicubic",
+               crop="center"
+               llama_template=""
+               ):
         ref_latents = []
         images = [image1, image2, image3, image4, image5]
         images_vl = []
@@ -57,7 +68,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                 height = round(samples.shape[2] * scale_by / 8.0) * 8
                 if vae is not None:
                     scale_by = 1
-                    s = comfy.utils.common_upscale(samples, width, height, "area", "disabled")
+                    s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                     image = s.movedim(1, -1)
                     ref_latents.append(vae.encode(image[:, :, :, :3]))
                     vae_images.append(image)
@@ -69,7 +80,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                     width = round(samples.shape[3] * scale_by)
                     height = round(samples.shape[2] * scale_by)
                 # print("after enable_vl_resize scale_by", scale_by)
-                s = comfy.utils.common_upscale(samples, width, height, "area", "disabled")
+                s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                 image = s.movedim(1, -1)
                 images_vl.append(image)
 
