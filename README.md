@@ -18,27 +18,35 @@ This node provides text encoding functionality with reference image support for 
 - **image3** (optional): Third reference image for image editing
 - **image4** (optional): Fourth reference image for image editing
 - **image5** (optional): Fifth reference image for image editing
-- **enable_resize** (optional): Enable automatic resizing of the reference image
+- **enable_resize** (optional): Enable automatic resizing of the reference image for VAE encoding
+- **enable_vl_resize** (optional): Enable automatic resizing of the reference image for VL encoding
 - **llama_template** (optional): Custom Llama template for image description and editing instructions
 
 #### Outputs
 
 - **CONDITIONING**: The encoded conditioning tensor
-- **IMAGE**: The processed reference images
+- **image1**: The processed first reference image
+- **image2**: The processed second reference image
+- **image3**: The processed third reference image
+- **image4**: The processed fourth reference image
+- **image5**: The processed fifth reference image
 - **LATENT**: The encoded latent representation of the first reference image
 
 #### Behavior
 
 - Encodes text prompts using CLIP with optional reference image guidance
 - Supports up to 5 reference images for complex editing tasks
-- Automatically resizes reference images to optimal dimensions
+- Automatically resizes reference images to optimal dimensions for both VAE and VL encoding
 - Integrates with VAE models to encode reference images into latent space
 - Supports custom Llama templates for more precise image editing instructions
+- Processes images separately for VAE encoding (1024x1024) and VL encoding (384x384)
+- Returns individual processed images for more flexible workflow connections
 
 ## Key Features
 
 - **Multi-Image Support**: Incorporate up to 5 reference images into your text-to-image generation workflow
-- **Automatic Image Resizing**: Automatically resize reference images to optimal dimensions
+- **Dual Resize Options**: Separate resizing controls for VAE encoding (1024px) and VL encoding (384px)
+- **Individual Image Outputs**: Each processed reference image is provided as a separate output for flexible connections
 - **Latent Space Integration**: Encode reference images into latent space for efficient processing
 - **Qwen Model Compatibility**: Specifically designed for Qwen-based image editing models
 - **Customizable Templates**: Use custom Llama templates for tailored image editing instructions
@@ -55,10 +63,29 @@ This node provides text encoding functionality with reference image support for 
 2. Connect a CLIP model to the clip input.
 3. Enter your text prompt in the prompt field.
 4. Optionally, connect up to 5 reference images to the image inputs.
-5. Configure the enable_resize and other options as needed.
-6. Connect the outputs to your image generation nodes.
+5. Configure the enable_resize, enable_vl_resize, and other options as needed.
+6. Connect the outputs to your image generation nodes:
+   - Use the "conditioning" output for your sampler
+   - Connect the individual image outputs (image1, image2, etc.) to nodes that need the processed reference images
+   - Use the "latent" output for latent-based operations
 
 ## Update Log
+
+### v1.0.5
+- Updated node to support separate enable_vl_resize parameter
+- Modified return types to provide 5 individual IMAGE outputs instead of a single combined output
+- Improved image processing logic with separate handling for VAE and VL encoding
+- Enhanced documentation to accurately reflect node inputs and outputs
+- Fixed latent output handling to properly return first reference image latent
+
+### v1.0.4
+- Fixed critical bug with undefined `image_prompt` variable
+- Fixed error when no reference images are provided
+- Improved node stability and error handling
+- Updated node implementation to support up to 5 reference images
+- Added support for custom Llama templates
+- Improved image processing and resizing logic
+- Enhanced VL encoding with better image description capabilities
 
 ### v1.0.3
 - Fixed critical bug with undefined `image_prompt` variable

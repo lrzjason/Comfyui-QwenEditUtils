@@ -50,6 +50,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
             if image is not None:
                 samples = image.movedim(-1, 1)
                 total = int(1024 * 1024)
+                scale_by = 1  # Default scale
                 if enable_resize:
                     scale_by = math.sqrt(total / (samples.shape[3] * samples.shape[2]))
                 width = round(samples.shape[3] * scale_by / 8.0) * 8
@@ -77,11 +78,8 @@ class TextEncodeQwenImageEditPlus_lrzjason:
         if len(ref_latents) > 0:
             conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
         # Return latent of first image if available, otherwise return empty latent
-        samples = ref_latents[0]
-        # print(vae_images.shape)
-        # vae_images = torch.cat(vae_images, dim=0)
-        # print(vae_images.shape)
-        latent_out = {"samples": samples} if len(ref_latents) > 0 else {"samples": torch.zeros(1, 4, 128, 128)}
+        samples = ref_latents[0] if len(ref_latents) > 0 else torch.zeros(1, 4, 128, 128)
+        latent_out = {"samples": samples}
         if len(vae_images) < 5:
             vae_images.extend([None] * (5 - len(vae_images)))
         o_image1, o_image2, o_image3, o_image4, o_image5 = vae_images
