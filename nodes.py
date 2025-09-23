@@ -9,7 +9,7 @@ import copy
 
 
 class TextEncodeQwenImageEditPlus_lrzjason:
-    upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "bislerp"]
+    upscale_methods = ["lanczos", "bicubic", "area"]
     crop_methods = ["disabled", "center"]
     @classmethod
     def INPUT_TYPES(s):
@@ -46,7 +46,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                image1=None, image2=None, image3=None, image4=None, image5=None, 
                enable_resize=True, enable_vl_resize=True, 
                upscale_method="bicubic",
-               crop="center"
+               crop="center",
                llama_template=""
                ):
         ref_latents = []
