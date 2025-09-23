@@ -9,6 +9,8 @@ A collection of utility nodes for Qwen-based image editing in ComfyUI.
   <img src="result.png" alt="Result Image" width="45%" />
 </p>
 
+You can find a complete ComfyUI workflow example in the [`qwen-edit-plus_example.json`](qwen-edit-plus_example.json) file. This workflow demonstrates how to use the TextEncodeQwenImageEditPlus node with two reference images to create an outfit transfer effect.
+
 ## Node
 
 ### TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)
