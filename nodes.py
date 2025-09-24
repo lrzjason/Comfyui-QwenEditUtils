@@ -58,6 +58,16 @@ class TextEncodeQwenImageEditPlus_lrzjason:
         if instruction == "":
             instruction_content = "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
         else:
+            # for handling mis use of instruction
+            if template_prefix in instruction:
+                # remove prefix from instruction
+                instruction = instruction.split(template_prefix)[1]
+            if template_suffix in instruction:
+                # remove suffix from instruction
+                instruction = instruction.split(template_suffix)[0]
+            if "{}" in instruction_content:
+                # remove {} from instruction
+                instruction_content = instruction_content.replace("{}", "")
             instruction_content = instruction
         llama_template = template_prefix + instruction_content + template_suffix
         image_prompt = ""
