@@ -741,212 +741,6 @@
       ]
     },
     {
-      "id": 11,
-      "type": "TextEncodeQwenImageEditPlus_lrzjason",
-      "pos": [
-        701.4712524414062,
-        213.78549194335938
-      ],
-      "size": [
-        532.9762573242188,
-        539.3969116210938
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 14
-        },
-        {
-          "localized_name": "vae",
-          "name": "vae",
-          "shape": 7,
-          "type": "VAE",
-          "link": 15
-        },
-        {
-          "localized_name": "image1",
-          "name": "image1",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 29
-        },
-        {
-          "localized_name": "image2",
-          "name": "image2",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 30
-        },
-        {
-          "localized_name": "image3",
-          "name": "image3",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "image4",
-          "name": "image4",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "image5",
-          "name": "image5",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "widget": {
-            "name": "prompt"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "enable_resize",
-          "name": "enable_resize",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "enable_resize"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "enable_vl_resize",
-          "name": "enable_vl_resize",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "enable_vl_resize"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "upscale_method",
-          "name": "upscale_method",
-          "shape": 7,
-          "type": "COMBO",
-          "widget": {
-            "name": "upscale_method"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "crop",
-          "name": "crop",
-          "shape": 7,
-          "type": "COMBO",
-          "widget": {
-            "name": "crop"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "llama_template",
-          "name": "llama_template",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "llama_template"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "links": [
-            2,
-            5
-          ]
-        },
-        {
-          "localized_name": "image1",
-          "name": "image1",
-          "type": "IMAGE",
-          "links": [
-            31,
-            33
-          ]
-        },
-        {
-          "localized_name": "image2",
-          "name": "image2",
-          "type": "IMAGE",
-          "links": [
-            32
-          ]
-        },
-        {
-          "localized_name": "image3",
-          "name": "image3",
-          "type": "IMAGE",
-          "links": null
-        },
-        {
-          "localized_name": "image4",
-          "name": "image4",
-          "type": "IMAGE",
-          "links": null
-        },
-        {
-          "localized_name": "image5",
-          "name": "image5",
-          "type": "IMAGE",
-          "links": null
-        },
-        {
-          "localized_name": "latent",
-          "name": "latent",
-          "type": "LATENT",
-          "links": [
-            7
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "TextEncodeQwenImageEditPlus_lrzjason",
-        "cnr_id": "qweneditutils",
-        "ver": "48db48f25a89909080365a42b51a6ee16ad9e80a",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "ue_properties": {
-          "widget_ue_connectable": {
-            "prompt": true,
-            "enable_resize": true,
-            "enable_vl_resize": true,
-            "llama_template": true
-          }
-        }
-      },
-      "widgets_values": [
-        "让image1中的模特穿上image2的服装，服装有棕色外套，黑色内衬，深色长裤，提着棕色手提袋，带着格子围脖，长筒靴子",
-        true,
-        true,
-        "lanczos",
-        "disabled",
-        "<|im_start|>system\nDescribe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
-      ]
-    },
-    {
       "id": 8,
       "type": "VAEDecode",
       "pos": [
@@ -1181,12 +975,12 @@
           {
             "name": "A",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_pkgae_00001_.png&type=temp&subfolder=&rand=0.5039789204151942"
+            "url": "/api/view?filename=rgthree.compare._temp_auptf_00001_.png&type=temp&subfolder=&rand=0.5841656365229188"
           },
           {
             "name": "B",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_pkgae_00002_.png&type=temp&subfolder=&rand=0.5422808833003279"
+            "url": "/api/view?filename=rgthree.compare._temp_auptf_00002_.png&type=temp&subfolder=&rand=0.5262569138507007"
           }
         ]
       ]
@@ -1230,6 +1024,212 @@
         }
       },
       "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "TextEncodeQwenImageEditPlus_lrzjason",
+      "pos": [
+        701.4712524414062,
+        213.78549194335938
+      ],
+      "size": [
+        532.9762573242188,
+        539.3969116210938
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 14
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 15
+        },
+        {
+          "localized_name": "image1",
+          "name": "image1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 29
+        },
+        {
+          "localized_name": "image2",
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 30
+        },
+        {
+          "localized_name": "image3",
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "localized_name": "image4",
+          "name": "image4",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "localized_name": "image5",
+          "name": "image5",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "localized_name": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enable_resize",
+          "name": "enable_resize",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enable_resize"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enable_vl_resize",
+          "name": "enable_vl_resize",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enable_vl_resize"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "upscale_method",
+          "name": "upscale_method",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "upscale_method"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "crop",
+          "name": "crop",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "crop"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "instruction",
+          "name": "instruction",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "instruction"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "conditioning",
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            2,
+            5
+          ]
+        },
+        {
+          "localized_name": "image1",
+          "name": "image1",
+          "type": "IMAGE",
+          "links": [
+            31,
+            33
+          ]
+        },
+        {
+          "localized_name": "image2",
+          "name": "image2",
+          "type": "IMAGE",
+          "links": [
+            32
+          ]
+        },
+        {
+          "localized_name": "image3",
+          "name": "image3",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "localized_name": "image4",
+          "name": "image4",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "localized_name": "image5",
+          "name": "image5",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "localized_name": "latent",
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImageEditPlus_lrzjason",
+        "cnr_id": "qweneditutils",
+        "ver": "48db48f25a89909080365a42b51a6ee16ad9e80a",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "prompt": true,
+            "enable_resize": true,
+            "enable_vl_resize": true,
+            "llama_template": true
+          }
+        }
+      },
+      "widgets_values": [
+        "让image1中的模特穿上image2的服装，服装有棕色外套，黑色内衬，深色长裤，提着棕色手提袋，带着格子围脖，长筒靴子",
+        true,
+        true,
+        "lanczos",
+        "disabled",
+        "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+      ]
     }
   ],
   "links": [
@@ -1404,10 +1404,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.3914251301220523,
+      "scale": 0.6934334949441538,
       "offset": [
-        99.50403848156179,
-        215.60247006381599
+        -83.1314032948514,
+        -65.93190103203091
       ]
     },
     "frontendVersion": "1.26.13",
