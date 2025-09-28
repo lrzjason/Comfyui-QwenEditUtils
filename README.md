@@ -86,7 +86,7 @@ This advanced node provides enhanced text encoding functionality with reference 
 #### Behavior
 
 - Provides advanced text encoding with separate control over VAE and VL image processing
-- Supports 6 reference images with different resize behaviors
+- Supports 3 reference images with different resize behaviors
 - Offers multiple target size options for more flexible image processing
 - Maintains separate image outputs for VAE-encoded and VL-resized images
 - Provides enhanced upscale and crop controls for optimal image processing
@@ -94,7 +94,7 @@ This advanced node provides enhanced text encoding functionality with reference 
 
 ## Key Features
 
-- **Multi-Image Support**: Incorporate up to 5 reference images into your text-to-image generation workflow
+- **Multi-Image Support**: Incorporate up to 3 reference images into your text-to-image generation workflow
 - **Dual Resize Options**: Separate resizing controls for VAE encoding (1024px) and VL encoding (384px)
 - **Individual Image Outputs**: Each processed reference image is provided as a separate output for flexible connections
 - **Latent Space Integration**: Encode reference images into latent space for efficient processing
@@ -107,19 +107,10 @@ This advanced node provides enhanced text encoding functionality with reference 
 2. Restart ComfyUI.
 3. The node will be available in the "advanced/conditioning" category.
 
-## Usage
-
-1. Add the "TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)" node to your workflow.
-2. Connect a CLIP model to the clip input.
-3. Enter your text prompt in the prompt field.
-4. Optionally, connect up to 5 reference images to the image inputs.
-5. Configure the enable_resize, enable_vl_resize, and other options as needed.
-6. Connect the outputs to your image generation nodes:
-   - Use the "conditioning" output for your sampler
-   - Connect the individual image outputs (image1, image2, etc.) to nodes that need the processed reference images
-   - Use the "latent" output for latent-based operations
-
 ## Update Log
+
+### v1.0.6
+- Updated advance node
 
 ### v1.0.5
 - Updated node to support separate enable_vl_resize parameter
