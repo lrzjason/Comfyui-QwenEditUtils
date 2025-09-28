@@ -51,6 +51,47 @@ This node provides text encoding functionality with reference image support for 
 - Processes images separately for VAE encoding (1024x1024) and VL encoding (384x384)
 - Returns individual processed images for more flexible workflow connections
 
+### TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)
+
+This advanced node provides enhanced text encoding functionality with reference image support for Qwen-based image editing workflows. It offers more precise control over image resizing and supports flexible image input configurations with separate processing for VAE and VL encoding.
+
+#### Inputs
+
+- **clip**: The CLIP model to use for encoding
+- **prompt**: The text prompt to encode
+- **vae** (optional): The VAE model for image encoding
+- **vl_resize_image1** (optional): First reference image for VL encoding with resizing
+- **vl_resize_image2** (optional): Second reference image for VL encoding with resizing
+- **vl_resize_image3** (optional): Third reference image for VL encoding with resizing
+- **not_resize_image1** (optional): First reference image without VL resizing
+- **not_resize_image2** (optional): Second reference image without VL resizing
+- **not_resize_image3** (optional): Third reference image without VL resizing
+- **target_size** (optional): Target size for VAE encoding (options: 1024, 1344, 1536, 2048, 768, 512)
+- **target_vl_size** (optional): Target size for VL encoding (default: 384)
+- **upscale_method** (optional): Method for upscaling images (options: "lanczos", "bicubic", "area")
+- **crop** (optional): Cropping method (options: "center", "disabled")
+- **instruction** (optional): Custom instruction for image editing
+
+#### Outputs
+
+- **CONDITIONING**: The encoded conditioning tensor
+- **LATENT**: The encoded latent representation of the first reference image
+- **target_image1**: The processed first target reference image
+- **target_image2**: The processed second target reference image
+- **target_image3**: The processed third target reference image
+- **vl_resized_image1**: The first VL-resized reference image
+- **vl_resized_image2**: The second VL-resized reference image
+- **vl_resized_image3**: The third VL-resized reference image
+
+#### Behavior
+
+- Provides advanced text encoding with separate control over VAE and VL image processing
+- Supports 6 reference images with different resize behaviors
+- Offers multiple target size options for more flexible image processing
+- Maintains separate image outputs for VAE-encoded and VL-resized images
+- Provides enhanced upscale and crop controls for optimal image processing
+- Integrates with custom instructions for tailored image editing
+
 ## Key Features
 
 - **Multi-Image Support**: Incorporate up to 5 reference images into your text-to-image generation workflow
