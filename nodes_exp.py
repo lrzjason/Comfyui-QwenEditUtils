@@ -425,7 +425,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 if image is not None:
                     samples = image.movedim(-1, 1)
                     current_total = (samples.shape[3] * samples.shape[2])
-                    total = int(target_size * target_size)
+                    total = int(target_size) * int(target_size)
                     scale_by = math.sqrt(total / current_total)
                     width = round(samples.shape[3] * scale_by / 64.0) * 64
                     height = round(samples.shape[2] * scale_by / 64.0) * 64
