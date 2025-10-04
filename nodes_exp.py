@@ -1,10 +1,215 @@
 import node_helpers
 import comfy.utils
 import math
+from PIL import Image
+import numpy as np
 import torch
+import cv2
+import copy
+import io
+import os
+import json
 import torch
+import base64
+import random
+import requests
+from typing import List, Dict, Tuple
+
+from PIL import Image, ImageOps, ImageFilter
 import numpy as np
 
+import folder_paths
+
+
+def pil2numpy(image: Image.Image):
+    return np.array(image).astype(np.float32) / 255.0
+def pil2tensor(image: Image.Image):
+    return torch.from_numpy(pil2numpy(image)).unsqueeze(0)
+
+def prepare_image_for_preview(image: Image.Image, output_dir: str, prefix=None):
+    if prefix is None:
+        prefix = "preview_" + "".join(random.choice("abcdefghijklmnopqrstupvxyz") for x in range(5))
+
+    # save image to temp folder
+    (
+        outdir,
+        filename,
+        counter,
+        subfolder,
+        _,
+    ) = folder_paths.get_save_image_path(prefix, output_dir, image.width, image.height)
+    file = f"{filename}_{counter:05}_.png"
+    image.save(os.path.join(outdir, file), format="PNG", compress_level=4)
+
+    return {
+        "filename": file,
+        "subfolder": subfolder,
+        "type": "temp",
+    }
+
+
+def numpy2pil(image: np.ndarray, mode=None):
+    return Image.fromarray(np.clip(255.0 * image, 0, 255).astype(np.uint8), mode)
+
+def tensor2pil(image: torch.Tensor, mode=None):
+    return numpy2pil(image.cpu().numpy().squeeze(), mode=mode)
+
+def load_images_from_url(urls: List[str], keep_alpha_channel=False):
+    images = []
+    masks = []
+
+    for url in urls:
+        if url.startswith("data:image/"):
+            i = Image.open(io.BytesIO(base64.b64decode(url.split(",")[1])))
+        elif url.startswith("file://"):
+            url = url[7:]
+            if not os.path.isfile(url):
+                raise Exception(f"File {url} does not exist")
+
+            i = Image.open(url)
+        elif url.startswith("http://") or url.startswith("https://"):
+            response = requests.get(url, timeout=5)
+            if response.status_code != 200:
+                raise Exception(response.text)
+
+            i = Image.open(io.BytesIO(response.content))
+        elif url.startswith(("/view?", "/api/view?")):
+            from urllib.parse import parse_qs
+
+            qs_idx = url.find("?")
+            qs = parse_qs(url[qs_idx + 1 :])
+            filename = qs.get("name", qs.get("filename", None))
+            if filename is None:
+                raise Exception(f"Invalid url: {url}")
+
+            filename = filename[0]
+            subfolder = qs.get("subfolder", None)
+            if subfolder is not None:
+                filename = os.path.join(subfolder[0], filename)
+
+            dirtype = qs.get("type", ["input"])
+            if dirtype[0] == "input":
+                url = os.path.join(folder_paths.get_input_directory(), filename)
+            elif dirtype[0] == "output":
+                url = os.path.join(folder_paths.get_output_directory(), filename)
+            elif dirtype[0] == "temp":
+                url = os.path.join(folder_paths.get_temp_directory(), filename)
+            else:
+                raise Exception(f"Invalid url: {url}")
+
+            i = Image.open(url)
+        elif url == "":
+            continue
+        else:
+            url = folder_paths.get_annotated_filepath(url)
+            if not os.path.isfile(url):
+                raise Exception(f"Invalid url: {url}")
+
+            i = Image.open(url)
+
+        i = ImageOps.exif_transpose(i)
+        has_alpha = "A" in i.getbands()
+        mask = None
+
+        if "RGB" not in i.mode:
+            i = i.convert("RGBA") if has_alpha else i.convert("RGB")
+
+        if has_alpha:
+            mask = i.getchannel("A")
+
+            # recreate image to fix weird RGB image
+            alpha = i.split()[-1]
+            image = Image.new("RGB", i.size, (0, 0, 0))
+            image.paste(i, mask=alpha)
+            image.putalpha(alpha)
+
+            if not keep_alpha_channel:
+                image = image.convert("RGB")
+        else:
+            image = i
+
+        images.append(image)
+        masks.append(mask)
+
+    return (images, masks)
+
+# http://127.0.0.1:8188/api/view?filename=1.png&subfolder=&type=output&rand=0.04266252963576478
+class LoadImageFromUrl_lrzjason:
+    def __init__(self) -> None:
+        self.output_dir = folder_paths.get_temp_directory()
+        self.filename_prefix = "TempImageFromUrl"
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "filename": ("STRING", {"multiline": True, "default": ""}),
+                "seed": ("INT", ),
+            },
+            "optional": {
+                "keep_alpha_channel": (
+                    "BOOLEAN",
+                    {"default": False, "label_on": "enabled", "label_off": "disabled"},
+                ),
+                "output_mode": (
+                    "BOOLEAN",
+                    {"default": False, "label_on": "list", "label_off": "batch"},
+                )
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "MASK", "BOOLEAN")
+    OUTPUT_IS_LIST = (True, True, False)
+    RETURN_NAMES = ("images", "masks", "has_image")
+    CATEGORY = "Art Venture/Image"
+    FUNCTION = "load_image"
+
+    def load_image(self, filename, seed, keep_alpha_channel=False, output_mode=False):
+        image = f"/view?filename={filename}.png&subfolder=&type=output&rand={seed}"
+        
+        urls = image.strip().split("\n")
+        images, masks = load_images_from_url(urls, keep_alpha_channel)
+        if len(images) == 0:
+            image = torch.zeros((1, 64, 64, 3), dtype=torch.float32, device="cpu")
+            mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+            images = [tensor2pil(image)]
+            masks = [tensor2pil(mask, mode="L")]
+
+        previews = []
+        np_images = []
+        np_masks = []
+
+        for image, mask in zip(images, masks):
+            # save image to temp folder
+            preview = prepare_image_for_preview(image, self.output_dir, self.filename_prefix)
+            image = pil2tensor(image)
+
+            if mask:
+                mask = np.array(mask).astype(np.float32) / 255.0
+                mask = 1.0 - torch.from_numpy(mask)
+            else:
+                mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+
+            previews.append(preview)
+            np_images.append(image)
+            np_masks.append(mask.unsqueeze(0))
+
+        if output_mode:
+            result = (np_images, np_masks, True)
+        else:
+            has_size_mismatch = False
+            if len(np_images) > 1:
+                for image in np_images[1:]:
+                    if image.shape[1] != np_images[0].shape[1] or image.shape[2] != np_images[0].shape[2]:
+                        has_size_mismatch = True
+                        break
+
+            if has_size_mismatch:
+                raise Exception("To output as batch, images must have the same size. Use list output mode instead.")
+
+            result = ([torch.cat(np_images)], [torch.cat(np_masks)], True)
+
+        return {"ui": {"images": previews}, "result": result}
 
 class TextEncodeQwenImageEditPlus_lrzjason:
     upscale_methods = ["lanczos", "bicubic", "area"]
@@ -118,7 +323,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
     upscale_methods = ["lanczos", "bicubic", "area"]
     crop_methods = ["center", "disabled"]
     target_sizes = [1024, 1344, 1536, 2048, 768, 512]
-    target_vl_sizes = [392,384]
+    target_vl_sizes = [378,384,392]
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -137,7 +342,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 "not_resize_image2": ("IMAGE", ),
                 "not_resize_image3": ("IMAGE", ),
                 "target_size": (s.target_sizes, {"default": 1024}),
-                "target_vl_size": (s.target_vl_sizes, {"default": 392}),
+                "target_vl_size": (s.target_vl_sizes, {"default": 384}),
                 "upscale_method": (s.upscale_methods,),
                 "crop": (s.crop_methods,),
                 "instruction": ("STRING", {"multiline": True, "default": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."}),
@@ -154,7 +359,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                vl_resize_image1=None, vl_resize_image2=None, vl_resize_image3=None,
                not_resize_image1=None, not_resize_image2=None, not_resize_image3=None, 
                target_size=1024, 
-               target_vl_size=392,
+               target_vl_size=384,
                upscale_method="lanczos",
                crop="center",
                instruction="",
@@ -220,7 +425,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 if image is not None:
                     samples = image.movedim(-1, 1)
                     current_total = (samples.shape[3] * samples.shape[2])
-                    total = int(target_size) * int(target_size)
+                    total = int(target_size * target_size)
                     scale_by = math.sqrt(total / current_total)
                     width = round(samples.shape[3] * scale_by / 64.0) * 64
                     height = round(samples.shape[2] * scale_by / 64.0) * 64
@@ -262,12 +467,14 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
 
 NODE_CLASS_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason,
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason
+    "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason,
+    "LoadImageFromUrl_lrzjason": LoadImageFromUrl_lrzjason
     
 }
 
 # Display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": "TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)",
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)"
+    "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)",
+    "LoadImageFromUrl_lrzjason": "LoadImageFromUrl 小志Jason(xiaozhijason)"
 }

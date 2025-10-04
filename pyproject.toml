@@ -1,7 +1,7 @@
 [project]
 name = "qweneditutils"
 description = "A collection of utility nodes for Qwen-based image editing in ComfyUI."
-version = "1.0.8"
+version = "1.0.9a"
 license = {file = "LICENSE"}
 
 [project.urls]
