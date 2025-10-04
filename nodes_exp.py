@@ -435,7 +435,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     vae_images.append(image)
                     
                     if vl_resize:
-                        total = int(target_vl_size * target_vl_size)
+                        total = int(target_vl_size) * int(target_vl_size)
                         scale_by = math.sqrt(total / current_total)
                         width = round(samples.shape[3] * scale_by / 2) *2
                         height = round(samples.shape[2] * scale_by / 2) *2
