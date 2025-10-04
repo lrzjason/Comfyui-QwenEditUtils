@@ -222,8 +222,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     current_total = (samples.shape[3] * samples.shape[2])
                     total = int(target_size * target_size)
                     scale_by = math.sqrt(total / current_total)
-                    width = round(samples.shape[3] * scale_by / 64.0) * 64
-                    height = round(samples.shape[2] * scale_by / 64.0) * 64
+                    width = round(samples.shape[3] * scale_by / 8.0) * 8
+                    height = round(samples.shape[2] * scale_by / 8.0) * 8
                     s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                     image = s.movedim(1, -1)
                     ref_latents.append(vae.encode(image[:, :, :, :3]))
@@ -232,8 +232,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     if vl_resize:
                         total = int(target_vl_size * target_vl_size)
                         scale_by = math.sqrt(total / current_total)
-                        width = round(samples.shape[3] * scale_by / 2) *2
-                        height = round(samples.shape[2] * scale_by / 2) *2
+                        width = round(samples.shape[3] * scale_by / 28) *28
+                        height = round(samples.shape[2] * scale_by / 28) *28
                         s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                         image = s.movedim(1, -1)
                         vl_resized_images.append(image)
