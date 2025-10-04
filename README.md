@@ -108,8 +108,6 @@ This advanced node provides enhanced text encoding functionality with reference 
 3. The node will be available in the "advanced/conditioning" category.
 
 ## Update Log
-### v1.0.9
-- Add 392 for vl resize.
 
 ### v1.0.6
 - Updated advance node
