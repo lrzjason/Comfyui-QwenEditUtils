@@ -323,7 +323,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
     upscale_methods = ["lanczos", "bicubic", "area"]
     crop_methods = ["center", "disabled"]
     target_sizes = [1024, 1344, 1536, 2048, 768, 512]
-    target_vl_sizes = [378,384,392]
+    target_vl_sizes = [392,384]
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -342,7 +342,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 "not_resize_image2": ("IMAGE", ),
                 "not_resize_image3": ("IMAGE", ),
                 "target_size": (s.target_sizes, {"default": 1024}),
-                "target_vl_size": (s.target_vl_sizes, {"default": 384}),
+                "target_vl_size": (s.target_vl_sizes, {"default": 392}),
                 "upscale_method": (s.upscale_methods,),
                 "crop": (s.crop_methods,),
                 "instruction": ("STRING", {"multiline": True, "default": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."}),
@@ -359,7 +359,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                vl_resize_image1=None, vl_resize_image2=None, vl_resize_image3=None,
                not_resize_image1=None, not_resize_image2=None, not_resize_image3=None, 
                target_size=1024, 
-               target_vl_size=384,
+               target_vl_size=392,
                upscale_method="lanczos",
                crop="center",
                instruction="",
@@ -427,8 +427,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     current_total = (samples.shape[3] * samples.shape[2])
                     total = int(target_size * target_size)
                     scale_by = math.sqrt(total / current_total)
-                    width = round(samples.shape[3] * scale_by / 64.0) * 64
-                    height = round(samples.shape[2] * scale_by / 64.0) * 64
+                    width = round(samples.shape[3] * scale_by / 8.0) * 8
+                    height = round(samples.shape[2] * scale_by / 8.0) * 8
                     s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                     image = s.movedim(1, -1)
                     ref_latents.append(vae.encode(image[:, :, :, :3]))
@@ -437,8 +437,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     if vl_resize:
                         total = int(target_vl_size * target_vl_size)
                         scale_by = math.sqrt(total / current_total)
-                        width = round(samples.shape[3] * scale_by / 2) *2
-                        height = round(samples.shape[2] * scale_by / 2) *2
+                        width = round(samples.shape[3] * scale_by / 28) *28
+                        height = round(samples.shape[2] * scale_by / 28) *28
                         s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                         image = s.movedim(1, -1)
                         vl_resized_images.append(image)
