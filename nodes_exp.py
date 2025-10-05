@@ -425,7 +425,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 if image is not None:
                     samples = image.movedim(-1, 1)
                     current_total = (samples.shape[3] * samples.shape[2])
-                    total = int(target_size * target_size)
+                    total = int(target_size) * int(target_size)
                     scale_by = math.sqrt(total / current_total)
                     width = round(samples.shape[3] * scale_by / 8.0) * 8
                     height = round(samples.shape[2] * scale_by / 8.0) * 8
@@ -435,7 +435,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     vae_images.append(image)
                     
                     if vl_resize:
-                        total = int(target_vl_size * target_vl_size)
+                        total = int(target_vl_size) * int(target_vl_size)
                         scale_by = math.sqrt(total / current_total)
                         width = round(samples.shape[3] * scale_by / 28) *28
                         height = round(samples.shape[2] * scale_by / 28) *28
