@@ -108,6 +108,9 @@ This advanced node provides enhanced text encoding functionality with reference 
 3. The node will be available in the "advanced/conditioning" category.
 
 ## Update Log
+### v1.1.3
+- Updated crop method pad to preserve most of the image
+- Add CropWithPadInfo to crop generated image with pad info
 
 ### v1.0.6
 - Updated advance node
