@@ -5,7 +5,6 @@ import torch
 import torch
 import numpy as np
 
-
 class TextEncodeQwenImageEditPlus_lrzjason:
     upscale_methods = ["lanczos", "bicubic", "area"]
     crop_methods = ["disabled", "center"]
@@ -80,8 +79,8 @@ class TextEncodeQwenImageEditPlus_lrzjason:
                 scale_by = 1  # Default scale
                 if enable_resize:
                     scale_by = math.sqrt(total / current_total)
-                width = round(samples.shape[3] * scale_by / 64.0) * 64
-                height = round(samples.shape[2] * scale_by / 64.0) * 64
+                width = round(samples.shape[3] * scale_by / 8.0) * 8
+                height = round(samples.shape[2] * scale_by / 8.0) * 8
                 if vae is not None:
                     s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                     image = s.movedim(1, -1)
@@ -116,7 +115,7 @@ class TextEncodeQwenImageEditPlus_lrzjason:
 
 class TextEncodeQwenImageEditPlusAdvance_lrzjason:
     upscale_methods = ["lanczos", "bicubic", "area"]
-    crop_methods = ["center", "disabled"]
+    crop_methods = ["pad", "center", "disabled"]
     target_sizes = [1024, 1344, 1536, 2048, 768, 512]
     target_vl_sizes = [392,384]
     @classmethod
@@ -139,13 +138,13 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 "target_size": (s.target_sizes, {"default": 1024}),
                 "target_vl_size": (s.target_vl_sizes, {"default": 384}),
                 "upscale_method": (s.upscale_methods,),
-                "crop": (s.crop_methods,),
+                "crop_method": (s.crop_methods,),
                 "instruction": ("STRING", {"multiline": True, "default": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."}),
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING", "LATENT", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE", )
-    RETURN_NAMES = ("conditioning", "latent", "target_image1", "target_image2", "target_image3", "vl_resized_image1", "vl_resized_image2", "vl_resized_image3")
+    RETURN_TYPES = ("CONDITIONING", "LATENT", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "CONDITIONING", "ANY")
+    RETURN_NAMES = ("conditioning_with_full_ref", "latent", "target_image1", "target_image2", "target_image3", "vl_resized_image1", "vl_resized_image2", "vl_resized_image3", "conditioning_with_first_ref", "pad_info")
     FUNCTION = "encode"
 
     CATEGORY = "advanced/conditioning"
@@ -156,27 +155,22 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                target_size=1024, 
                target_vl_size=384,
                upscale_method="lanczos",
-               crop="center",
+               crop_method="center",
                instruction="",
                ):
+        pad_info = {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "scale_by": 0
+        }
         ref_latents = []
         images = [not_resize_image1, not_resize_image2, not_resize_image3, 
                   vl_resize_image1, vl_resize_image2, vl_resize_image3]
         vl_resized_images = []
         
         images = [
-            {
-                "image": not_resize_image1,
-                "vl_resize": False 
-            },
-            {
-                "image": not_resize_image2,
-                "vl_resize": False 
-            },
-            {
-                "image": not_resize_image3,
-                "vl_resize": False 
-            },
             {
                 "image": vl_resize_image1,
                 "vl_resize": True 
@@ -188,6 +182,18 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
             {
                 "image": vl_resize_image3,
                 "vl_resize": True 
+            },
+            {
+                "image": not_resize_image1,
+                "vl_resize": False 
+            },
+            {
+                "image": not_resize_image2,
+                "vl_resize": False 
+            },
+            {
+                "image": not_resize_image3,
+                "vl_resize": False 
             }
         ]
         
@@ -222,19 +228,73 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                     current_total = (samples.shape[3] * samples.shape[2])
                     total = int(target_size * target_size)
                     scale_by = math.sqrt(total / current_total)
-                    width = round(samples.shape[3] * scale_by / 64.0) * 64
-                    height = round(samples.shape[2] * scale_by / 64.0) * 64
-                    s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
+                    if crop_method == "pad":
+                        crop = "center"
+                        # pad image to upper size
+                        scaled_width = round(samples.shape[3] * scale_by)
+                        scaled_height = round(samples.shape[2] * scale_by)
+                        canvas_width = math.ceil(samples.shape[3] * scale_by / 8.0) * 8
+                        canvas_height = math.ceil(samples.shape[2] * scale_by / 8.0) * 8
+                        
+                        # pad image to canvas size
+                        canvas = torch.zeros(
+                            (samples.shape[0], samples.shape[1], canvas_height, canvas_width),
+                            dtype=samples.dtype,
+                            device=samples.device
+                        )
+                        resized_samples = comfy.utils.common_upscale(samples, scaled_width, scaled_height, upscale_method, crop)
+                        resized_width = resized_samples.shape[3]
+                        resized_height = resized_samples.shape[2]
+                        
+                        canvas[:, :, :resized_height, :resized_width] = resized_samples
+                        pad_info = {
+                            "x": 0,
+                            "y": 0,
+                            "width": canvas_width - resized_width,
+                            "height": canvas_height - resized_height,
+                            "scale_by": 1 / scale_by
+                        }
+                        s = canvas
+                    else:
+                        width = round(samples.shape[3] * scale_by / 8.0) * 8
+                        height = round(samples.shape[2] * scale_by / 8.0) * 8
+                        crop = crop_method
+                        s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
                     image = s.movedim(1, -1)
                     ref_latents.append(vae.encode(image[:, :, :, :3]))
                     vae_images.append(image)
                     
                     if vl_resize:
+                        # print("vl_resize")
                         total = int(target_vl_size * target_vl_size)
                         scale_by = math.sqrt(total / current_total)
-                        width = round(samples.shape[3] * scale_by / 2) *2
-                        height = round(samples.shape[2] * scale_by / 2) *2
-                        s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
+                        
+                        if crop_method == "pad":
+                            crop = "center"
+                            # pad image to upper size
+                            scaled_width = round(samples.shape[3] * scale_by)
+                            scaled_height = round(samples.shape[2] * scale_by)
+                            canvas_width = math.ceil(samples.shape[3] * scale_by)
+                            canvas_height = math.ceil(samples.shape[2] * scale_by)
+                            
+                            # pad image to canvas size
+                            canvas = torch.zeros(
+                                (samples.shape[0], samples.shape[1], canvas_height, canvas_width),
+                                dtype=samples.dtype,
+                                device=samples.device
+                            )
+                            resized_samples = comfy.utils.common_upscale(samples, scaled_width, scaled_height, upscale_method, crop)
+                            resized_width = resized_samples.shape[3]
+                            resized_height = resized_samples.shape[2]
+                            
+                            canvas[:, :, :resized_height, :resized_width] = resized_samples
+                            s = canvas
+                        else:
+                            width = round(samples.shape[3] * scale_by / 8.0) * 8
+                            height = round(samples.shape[2] * scale_by / 8.0) * 8
+                            crop = crop_method
+                            s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
+                        
                         image = s.movedim(1, -1)
                         vl_resized_images.append(image)
                     # handle non resize vl images
@@ -245,7 +305,9 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
         tokens = clip.tokenize(image_prompt + prompt, images=vl_images, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
         if len(ref_latents) > 0:
-            conditioning = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
+            conditioning_full_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
+            
+            conditioning_with_first_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latents[0]]}, append=True)
         # Return latent of first image if available, otherwise return empty latent
         samples = ref_latents[0] if len(ref_latents) > 0 else torch.zeros(1, 4, 128, 128)
         latent_out = {"samples": samples}
@@ -257,17 +319,61 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
             vl_resized_images.extend([None] * (3 - len(vl_resized_images)))
         vl_image1, vl_image2, vl_image3 = vl_resized_images
         
-        return (conditioning, latent_out, o_image1, o_image2, o_image3, vl_image1, vl_image2, vl_image3)
+        return (conditioning_full_ref, latent_out, o_image1, o_image2, o_image3, vl_image1, vl_image2, vl_image3, conditioning_with_first_ref, pad_info)
+
+
+class CropWithPadInfo:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "image": ("IMAGE", ),
+                "pad_info": ("ANY", ),  # pad_info dictionary containing x, y, width, height and scale
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "FLOAT",)
+    RETURN_NAMES = ("cropped_image", "scale_by", )
+    FUNCTION = "crop_image"
+
+    CATEGORY = "image"
+
+    def crop_image(self, image, pad_info):
+        # Extract pad information from the original padding process:
+        # In the original function:
+        # - resized_samples are placed at canvas[:, :, :resized_height, :resized_width]
+        # - pad_info = {"x": 0, "y": 0, "width": canvas_width - resized_width, "height": canvas_height - resized_height}
+        x = pad_info.get("x", 0)  # This is always 0 in the original function
+        y = pad_info.get("y", 0)  # This is always 0 in the original function
+        width_padding = pad_info.get("width", 0)  # Right/bottom padding added
+        height_padding = pad_info.get("height", 0)  # Right/bottom padding added
+        scale_by = pad_info.get("scale_by", 1.0)
+        
+        img = image.movedim(-1, 1)  # Convert from (H, W, C) to (C, H, W)
+        
+        # Calculate the original content dimensions before padding was added
+        original_content_width = img.shape[3] - width_padding
+        original_content_height = img.shape[2] - height_padding
+        
+        # Crop to get just the original content area (which was placed at position (0,0))
+        cropped_img = img[:, :, x:original_content_height, y:original_content_width]
+        
+        # Convert back to (H, W, C) format
+        cropped_image = cropped_img.movedim(1, -1)
+        
+        return (cropped_image, scale_by)
 
 
 NODE_CLASS_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason,
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason
+    "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason,
+    "CropWithPadInfo": CropWithPadInfo,
     
 }
 
 # Display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
     "TextEncodeQwenImageEditPlus_lrzjason": "TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)",
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)"
+    "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)",
+    "CropWithPadInfo": "Crop With Pad Info",
 }
