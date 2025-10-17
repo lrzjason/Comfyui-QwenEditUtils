@@ -173,18 +173,6 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
         
         images = [
             {
-                "image": vl_resize_image1,
-                "vl_resize": True 
-            },
-            {
-                "image": vl_resize_image2,
-                "vl_resize": True 
-            },
-            {
-                "image": vl_resize_image3,
-                "vl_resize": True 
-            },
-            {
                 "image": not_resize_image1,
                 "vl_resize": False 
             },
@@ -195,6 +183,18 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
             {
                 "image": not_resize_image3,
                 "vl_resize": False 
+            },
+            {
+                "image": vl_resize_image1,
+                "vl_resize": True 
+            },
+            {
+                "image": vl_resize_image2,
+                "vl_resize": True 
+            },
+            {
+                "image": vl_resize_image3,
+                "vl_resize": True 
             }
         ]
         
