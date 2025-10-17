@@ -12,6 +12,9 @@ A collection of utility nodes for Qwen-based image editing in ComfyUI.
 You can find a complete ComfyUI workflow example in the [`qwen-edit-plus_example.json`](qwen-edit-plus_example.json) file. This workflow demonstrates how to use the TextEncodeQwenImageEditPlus node with two reference images to create an outfit transfer effect.
 
 ## Update Log
+### v1.1.6
+- Add new node for new image resize handling
+
 ### v1.1.5
 - Rollback the vl resize and not resize output sequence
 
@@ -100,6 +103,50 @@ This advanced node provides enhanced text encoding functionality with reference 
 - Maintains separate image outputs for VAE-encoded and VL-resized images
 - Provides enhanced upscale and crop controls for optimal image processing
 - Integrates with custom instructions for tailored image editing
+
+### TextEncodeQwenImageEditPlusPro 小志Jason(xiaozhijason)
+
+This professional node provides the most flexible text encoding functionality with reference image support for Qwen-based image editing workflows. It offers fine-grained control over which images are VL-resized and includes a main image designation for focused conditioning.
+
+#### Inputs
+
+- **clip**: The CLIP model to use for encoding
+- **prompt**: The text prompt to encode
+- **vae** (optional): The VAE model for image encoding
+- **image1** (optional): First reference image for image editing
+- **image2** (optional): Second reference image for image editing
+- **image3** (optional): Third reference image for image editing
+- **image4** (optional): Fourth reference image for image editing
+- **image5** (optional): Fifth reference image for image editing
+- **vl_resize_indexs** (optional): Comma-separated indexes of images to apply VL resizing (default: "0,1,2")
+- **main_image_index** (optional): Index of the main reference image for focused conditioning (default: 0)
+- **target_size** (optional): Target size for VAE encoding (options: 1024, 1344, 1536, 2048, 768, 512)
+- **target_vl_size** (optional): Target size for VL encoding (options: 384, 392)
+- **upscale_method** (optional): Method for upscaling images (options: "lanczos", "bicubic", "area")
+- **crop_method** (optional): Cropping method (options: "pad", "center", "disabled")
+- **instruction** (optional): Custom instruction for image editing
+
+#### Outputs
+
+- **CONDITIONING**: The encoded conditioning tensor with all reference latents
+- **LATENT**: The encoded latent representation of the main reference image
+- **image1**: The processed first reference image
+- **image2**: The processed second reference image
+- **image3**: The processed third reference image
+- **image4**: The processed fourth reference image
+- **image5**: The processed fifth reference image
+- **CONDITIONING**: The encoded conditioning tensor with only the main reference latent
+- **ANY**: The pad information dictionary containing scaling and padding details
+
+#### Behavior
+
+- Provides professional-level text encoding with maximum flexibility for image processing
+- Supports up to 5 reference images with configurable VL-resizing per image
+- Allows designation of a main reference image for focused conditioning
+- Offers separate conditioning outputs for full reference and main reference conditioning
+- Provides multiple target size options for more flexible image processing
+- Includes pad information for potential image cropping and scaling operations
+- Provides enhanced upscale and crop controls, including padding for image preservation
 
 ## Key Features
 

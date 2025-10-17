@@ -465,16 +465,16 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
         return (conditioning, latent_out, o_image1, o_image2, o_image3, vl_image1, vl_image2, vl_image3)
 
 
-NODE_CLASS_MAPPINGS = {
-    "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason,
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason,
-    "LoadImageFromUrl_lrzjason": LoadImageFromUrl_lrzjason
+# NODE_CLASS_MAPPINGS = {
+#     "TextEncodeQwenImageEditPlus_lrzjason": TextEncodeQwenImageEditPlus_lrzjason,
+#     "TextEncodeQwenImageEditPlusAdvance_lrzjason": TextEncodeQwenImageEditPlusAdvance_lrzjason,
+#     "LoadImageFromUrl_lrzjason": LoadImageFromUrl_lrzjason
     
-}
+# }
 
-# Display name mappings
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "TextEncodeQwenImageEditPlus_lrzjason": "TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)",
-    "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)",
-    "LoadImageFromUrl_lrzjason": "LoadImageFromUrl 小志Jason(xiaozhijason)"
-}
+# # Display name mappings
+# NODE_DISPLAY_NAME_MAPPINGS = {
+#     "TextEncodeQwenImageEditPlus_lrzjason": "TextEncodeQwenImageEditPlus 小志Jason(xiaozhijason)",
+#     "TextEncodeQwenImageEditPlusAdvance_lrzjason": "TextEncodeQwenImageEditPlusAdvance 小志Jason(xiaozhijason)",
+#     "LoadImageFromUrl_lrzjason": "LoadImageFromUrl 小志Jason(xiaozhijason)"
+# }
