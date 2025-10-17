@@ -519,7 +519,9 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
 
 def validate_vl_resize_indexs(vl_resize_indexs_str, valid_length):
     try:
-        indexes = [int(i) for i in vl_resize_indexs_str.split(",")]
+        indexes = [int(i)-1 for i in vl_resize_indexs_str.split(",")]
+        # remove duplicates
+        indexes = list(set(indexes))
     except ValueError as e:
         raise ValueError(f"Invalid format for vl_resize_indexs: {e}")
 
@@ -535,8 +537,8 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
     crop_methods = ["pad", "center", "disabled"]
     target_sizes = [1024, 1344, 1536, 2048, 768, 512]
     target_vl_sizes = [392,384]
-    vl_resize_indexs = [0,1,2]
-    main_image_index = 0
+    vl_resize_indexs = [1,2,3]
+    main_image_index = 1
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -553,8 +555,8 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
                 "image3": ("IMAGE", ),
                 "image4": ("IMAGE", ),
                 "image5": ("IMAGE", ),
-                "vl_resize_indexs": ("STRING", {"default": "0,1,2"}),
-                "main_image_index": ("INT", {"default": 0}),
+                "vl_resize_indexs": ("STRING", {"default": "1,2,3"}),
+                "main_image_index": ("INT", {"default": 1, "max": 5, "min": 1}),
                 "target_size": (s.target_sizes, {"default": 1024}),
                 "target_vl_size": (s.target_vl_sizes, {"default": 384}),
                 "upscale_method": (s.upscale_methods,),
@@ -572,8 +574,8 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
     def encode(self, clip, prompt, vae=None, 
                image1=None, image2=None, image3=None,
                image4=None, image5=None, 
-               vl_resize_indexs="0,1,2",
-               main_image_index=0,
+               vl_resize_indexs="1,2,3",
+               main_image_index=1,
                target_size=1024, 
                target_vl_size=384,
                upscale_method="lanczos",
@@ -582,6 +584,12 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
                ):
         # check vl_resize_indexs is valid indexes and not out of range
         resize_indexs = validate_vl_resize_indexs(vl_resize_indexs,5)
+        
+        # remap main_image_index from start from 1 to 0
+        main_image_index = main_image_index - 1
+        if main_image_index not in resize_indexs:
+            print("\n Auto fixing main_image_index to the first image index")
+            main_image_index = resize_indexs[0]
         
         pad_info = {
             "x": 0,
