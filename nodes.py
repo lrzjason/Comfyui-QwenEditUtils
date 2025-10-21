@@ -354,6 +354,7 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                crop_method="center",
                instruction="",
                ):
+        
         pad_info = {
             "x": 0,
             "y": 0,
@@ -500,6 +501,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 
         tokens = clip.tokenize(image_prompt + prompt, images=vl_images, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
+        conditioning_full_ref = None
+        conditioning_with_first_ref = None
         if len(ref_latents) > 0:
             conditioning_full_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
             
@@ -585,11 +588,6 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
         # check vl_resize_indexs is valid indexes and not out of range
         resize_indexs = validate_vl_resize_indexs(vl_resize_indexs,5)
         
-        # remap main_image_index from start from 1 to 0
-        main_image_index = main_image_index - 1
-        if main_image_index not in resize_indexs:
-            print("\n Auto fixing main_image_index to the first image index")
-            main_image_index = resize_indexs[0]
         
         pad_info = {
             "x": 0,
@@ -718,13 +716,21 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
                 
         tokens = clip.tokenize(image_prompt + prompt, images=vl_images, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
+        conditioning_full_ref = None
+        conditioning_with_main_ref = None
+        samples = torch.zeros(1, 4, 128, 128)
+        
         if len(ref_latents) > 0:
+            # remap main_image_index from start from 1 to 0
+            main_image_index = main_image_index - 1
+            if main_image_index >= len(ref_latents):
+                print("\n Auto fixing main_image_index to the first image index")
+                main_image_index = 0
             conditioning_full_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
-            
             conditioning_with_main_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": [ref_latents[main_image_index]]}, append=True)
-        # Return latent of first image if available, otherwise return empty latent
-        # samples = ref_latents[0] if len(ref_latents) > 0 else torch.zeros(1, 4, 128, 128)
-        samples = ref_latents[main_image_index] if len(ref_latents) > 0 else torch.zeros(1, 4, 128, 128)
+            # Return latent of first image if available, otherwise return empty latent
+            # samples = ref_latents[0] if len(ref_latents) > 0 else torch.zeros(1, 4, 128, 128)
+            samples = ref_latents[main_image_index]
         latent_out = {"samples": samples}
         if len(vae_images) < len(images):
             vae_images.extend([None] * (len(images) - len(vae_images)))
