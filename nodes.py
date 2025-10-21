@@ -501,8 +501,8 @@ class TextEncodeQwenImageEditPlusAdvance_lrzjason:
                 
         tokens = clip.tokenize(image_prompt + prompt, images=vl_images, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
-        conditioning_full_ref = None
-        conditioning_with_first_ref = None
+        conditioning_full_ref = conditioning
+        conditioning_with_first_ref = conditioning
         if len(ref_latents) > 0:
             conditioning_full_ref = node_helpers.conditioning_set_values(conditioning, {"reference_latents": ref_latents}, append=True)
             
@@ -716,8 +716,8 @@ class TextEncodeQwenImageEditPlusPro_lrzjason:
                 
         tokens = clip.tokenize(image_prompt + prompt, images=vl_images, llama_template=llama_template)
         conditioning = clip.encode_from_tokens_scheduled(tokens)
-        conditioning_full_ref = None
-        conditioning_with_main_ref = None
+        conditioning_full_ref = conditioning
+        conditioning_with_main_ref = conditioning
         samples = torch.zeros(1, 4, 128, 128)
         
         if len(ref_latents) > 0:
