@@ -1440,6 +1440,132 @@ class LoadImageReturnFilename:
 
         return True
 
+
+class ImageResizePlus:
+    """独立的图像调整大小节点，提取自TextEncodeQwenImageEditPlusAdvance的图像处理逻辑"""
+    
+    upscale_methods = ["lanczos", "bicubic", "area"]
+    crop_methods = ["pad", "center", "disabled"]
+    target_sizes = [512, 768, 1024, 1344, 1536, 2048]
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "image": ("IMAGE", ),
+                "target_size": (s.target_sizes, {"default": 1024}),
+                "upscale_method": (s.upscale_methods, {"default": "lanczos"}),
+                "crop_method": (s.crop_methods, {"default": "center"}),
+            },
+            "optional": {
+                "target_vl_size": ("INT", {"default": 384, "min": 64, "max": 2048, "step": 1}),
+                "enable_vl_resize": ("BOOLEAN", {"default": False}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "IMAGE", "ANY")
+    RETURN_NAMES = ("resized_image", "vl_resized_image", "pad_info")
+    FUNCTION = "resize"
+
+    CATEGORY = "image/processing"
+
+    def resize(self, image, target_size=1024, upscale_method="lanczos", crop_method="center",
+               target_vl_size=384, enable_vl_resize=False):
+        """
+        图像调整大小处理，提取自TextEncodeQwenImageEditPlusAdvance_lrzjason
+        """
+        pad_info = {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "scale_by": 1.0
+        }
+        
+        # 如果输入图像为None，返回空图像
+        if image is None:
+            # 创建一个空的图像张量
+            empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
+            return (empty_image, empty_image, pad_info)
+        
+        samples = image.movedim(-1, 1)
+        current_total = (samples.shape[3] * samples.shape[2])
+        total = int(target_size * target_size)
+        scale_by = math.sqrt(total / current_total)
+        
+        if crop_method == "pad":
+            crop = "center"
+            # pad image to upper size
+            scaled_width = round(samples.shape[3] * scale_by)
+            scaled_height = round(samples.shape[2] * scale_by)
+            canvas_width = math.ceil(samples.shape[3] * scale_by / 8.0) * 8
+            canvas_height = math.ceil(samples.shape[2] * scale_by / 8.0) * 8
+            
+            # pad image to canvas size
+            canvas = torch.zeros(
+                (samples.shape[0], samples.shape[1], canvas_height, canvas_width),
+                dtype=samples.dtype,
+                device=samples.device
+            )
+            resized_samples = comfy.utils.common_upscale(samples, scaled_width, scaled_height, upscale_method, crop)
+            resized_width = resized_samples.shape[3]
+            resized_height = resized_samples.shape[2]
+            
+            canvas[:, :, :resized_height, :resized_width] = resized_samples
+            pad_info = {
+                "x": 0,
+                "y": 0,
+                "width": canvas_width - resized_width,
+                "height": canvas_height - resized_height,
+                "scale_by": 1 / scale_by
+            }
+            s = canvas
+        else:
+            width = round(samples.shape[3] * scale_by / 8.0) * 8
+            height = round(samples.shape[2] * scale_by / 8.0) * 8
+            crop = crop_method
+            s = comfy.utils.common_upscale(samples, width, height, upscale_method, crop)
+        
+        resized_image = s.movedim(1, -1)
+        
+        # VL resize处理
+        vl_resized_image = None
+        if enable_vl_resize:
+            total_vl = int(target_vl_size * target_vl_size)
+            scale_by_vl = math.sqrt(total_vl / current_total)
+            
+            if crop_method == "pad":
+                crop_vl = "center"
+                scaled_width_vl = round(samples.shape[3] * scale_by_vl)
+                scaled_height_vl = round(samples.shape[2] * scale_by_vl)
+                canvas_width_vl = math.ceil(samples.shape[3] * scale_by_vl)
+                canvas_height_vl = math.ceil(samples.shape[2] * scale_by_vl)
+                
+                canvas_vl = torch.zeros(
+                    (samples.shape[0], samples.shape[1], canvas_height_vl, canvas_width_vl),
+                    dtype=samples.dtype,
+                    device=samples.device
+                )
+                resized_samples_vl = comfy.utils.common_upscale(samples, scaled_width_vl, scaled_height_vl, upscale_method, crop_vl)
+                resized_width_vl = resized_samples_vl.shape[3]
+                resized_height_vl = resized_samples_vl.shape[2]
+                
+                canvas_vl[:, :, :resized_height_vl, :resized_width_vl] = resized_samples_vl
+                s_vl = canvas_vl
+            else:
+                width_vl = round(samples.shape[3] * scale_by_vl)
+                height_vl = round(samples.shape[2] * scale_by_vl)
+                crop_vl = crop_method
+                s_vl = comfy.utils.common_upscale(samples, width_vl, height_vl, upscale_method, crop_vl)
+            
+            vl_resized_image = s_vl.movedim(1, -1)
+        else:
+            # 如果未启用VL调整，返回与resized_image相同的图像
+            vl_resized_image = resized_image.clone()
+        
+        return (resized_image, vl_resized_image, pad_info)
+
+
 NODE_CLASS_MAPPINGS = {
     "CropWithPadInfo": CropWithPadInfo,
     "TextEncodeQwenImageEdit_lrzjason": TextEncodeQwenImageEdit_lrzjason,
@@ -1454,7 +1580,8 @@ NODE_CLASS_MAPPINGS = {
     "QwenEditAny2Image": QwenEditAny2Image,
     "QwenEditAny2Latent": QwenEditAny2Latent,
     "QwenEditAdaptiveLongestEdge": QwenEditAdaptiveLongestEdge,
-    "LoadImageReturnFilename": LoadImageReturnFilename
+    "LoadImageReturnFilename": LoadImageReturnFilename,
+    "ImageResizePlus": ImageResizePlus
 }
 
 # Display name mappings
@@ -1472,5 +1599,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "QwenEditAny2Image": "Qwen Edit Any2Image",
     "QwenEditAny2Latent": "Qwen Edit Any2Latent",
     "QwenEditAdaptiveLongestEdge": "Qwen Edit Adaptive Longest Edge",
-    "LoadImageReturnFilename": "Load Image Return Filename"
+    "LoadImageReturnFilename": "Load Image Return Filename",
+    "ImageResizePlus": "Image Resize Plus"
 }
